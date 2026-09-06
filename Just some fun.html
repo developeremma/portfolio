@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Emma Morales - New Grad RN</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+  :root{
+    --shell:#c9c6be;
+    --shell-hi:#e3e1da;
+    --shell-lo:#9a978f;
+    --shell-dark:#7d7a72;
+    --deep:#5a5852;
+    --btn-purple:#8b2f6b;
+    --btn-purple-lo:#6a2251;
+    --screen-frame:#4a4a52;
+    --screen-frame-hi:#5e5e68;
+    --lcd:#8fb03b;
+    --lcd-dark:#0f380f;
+    --lcd-mid:#306230;
+    --lcd-light:#9bbc0f;
+    --lcd-bg:#8bac0f;
+    --power:#e33a2e;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box}
+
+  html,body{height:100%}
+  body{
+    background:radial-gradient(circle at 50% 30%,#3a3d44,#1a1c20 80%);
+    font-family:'Press Start 2P',monospace;
+    display:flex;align-items:center;justify-content:center;
+    min-height:100vh;padding:20px;
+    -webkit-font-smoothing:none;
+  }
+
+  /* ===== CONSOLE SHELL ===== */
+  .console{
+    position:relative;
+    width:360px;
+    background:linear-gradient(145deg,var(--shell-hi),var(--shell) 40%,var(--shell-lo));
+    border-radius:14px 14px 60px 14px;
+    padding:22px 20px 34px;
+    box-shadow:
+      inset 2px 2px 3px rgba(255,255,255,.6),
+      inset -3px -3px 6px rgba(0,0,0,.35),
+      0 20px 40px rgba(0,0,0,.55),
+      0 3px 6px rgba(0,0,0,.4);
+  }
+  /* subtle top ridge line */
+  .console::before{
+    content:"";position:absolute;top:10px;left:14px;right:14px;height:2px;
+    background:linear-gradient(90deg,transparent,rgba(0,0,0,.18),transparent);
+    border-radius:2px;
+  }
+
+  .brandline{
+    display:flex;align-items:center;justify-content:center;gap:6px;
+    font-size:7px;color:var(--deep);letter-spacing:1px;
+    margin-bottom:12px;
+  }
+  .brandline .dot{width:5px;height:5px;border-radius:50%;background:var(--btn-purple);box-shadow:inset -1px -1px 1px rgba(0,0,0,.4)}
+
+  /* ===== SCREEN ASSEMBLY ===== */
+  .screen-frame{
+    background:linear-gradient(145deg,var(--screen-frame-hi),var(--screen-frame));
+    border-radius:10px 10px 26px 10px;
+    padding:26px 34px 40px;
+    box-shadow:
+      inset 3px 3px 6px rgba(0,0,0,.55),
+      inset -1px -1px 2px rgba(255,255,255,.12);
+    position:relative;
+  }
+  .power-line{
+    position:absolute;top:14px;left:20px;display:flex;align-items:center;gap:6px;
+    font-size:6px;color:#c3c3cc;letter-spacing:.5px;
+  }
+  .power-dot{width:6px;height:6px;border-radius:50%;background:var(--power);
+    box-shadow:0 0 5px var(--power),inset -1px -1px 1px rgba(0,0,0,.4);}
+  .screen-label{
+    position:absolute;bottom:12px;left:0;right:0;text-align:center;
+    font-size:6px;color:#c3c3cc;letter-spacing:2px;
+  }
+  .screen-label b{color:#e8433a;font-weight:normal}
+
+  /* The LCD itself */
+  .lcd{
+    position:relative;
+    aspect-ratio:10/9;
+    background:var(--lcd-bg);
+    border-radius:4px;
+    overflow:hidden;
+    box-shadow:inset 0 0 0 1px rgba(0,0,0,.3),inset 2px 2px 5px rgba(0,0,0,.35);
+    image-rendering:pixelated;
+  }
+  /* scanline + pixel-grid overlay for authentic LCD feel */
+  .lcd::after{
+    content:"";position:absolute;inset:0;pointer-events:none;z-index:20;
+    background:
+      repeating-linear-gradient(0deg,rgba(15,56,15,.10) 0 2px,transparent 2px 4px),
+      repeating-linear-gradient(90deg,rgba(15,56,15,.06) 0 2px,transparent 2px 4px);
+    mix-blend-mode:multiply;
+  }
+  .lcd::before{
+    content:"";position:absolute;inset:0;pointer-events:none;z-index:21;
+    background:linear-gradient(135deg,rgba(255,255,255,.14),transparent 40%);
+  }
+
+  /* ===== SCREEN CONTENT ===== */
+  .lcd-screen{
+    position:absolute;inset:0;z-index:10;
+    color:var(--lcd-dark);
+    display:flex;flex-direction:column;
+    padding:10px 10px 4px;
+    font-size:8px;line-height:1.7;
+  }
+  .lcd-screen .topbar{
+    display:flex;justify-content:space-between;align-items:center;
+    border-bottom:2px solid var(--lcd-dark);
+    padding-bottom:5px;margin-bottom:6px;font-size:7px;
+  }
+  .hearts{letter-spacing:1px}
+  .view{flex:1;overflow:hidden;position:relative}
+
+  .page{display:none;animation:flick .12s steps(2)}
+  .page.active{display:block}
+  @keyframes flick{from{opacity:.4}to{opacity:1}}
+
+  /* HOME */
+  .avatar{
+    width:52px;height:52px;margin:2px auto 6px;
+    background:
+      linear-gradient(var(--lcd-dark),var(--lcd-dark)) padding-box;
+    border:2px solid var(--lcd-dark);
+    display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);
+    image-rendering:pixelated;
+  }
+  .avatar i{display:block}
+  .home-title{text-align:center;font-size:9px;margin-bottom:1px}
+  .home-sub{text-align:center;font-size:6px;color:var(--lcd-mid);margin-bottom:8px}
+  .press{text-align:center;font-size:6px;animation:blink 1s steps(1) infinite}
+  @keyframes blink{50%{opacity:0}}
+
+  /* MENU */
+  .menu-title{font-size:8px;margin-bottom:6px;text-align:center;text-decoration:underline}
+  .menu-item{
+    display:flex;align-items:center;gap:5px;font-size:7px;
+    padding:2px 3px;margin-bottom:2px;
+  }
+  .menu-item .cur{width:8px;visibility:hidden}
+  .menu-item.sel{background:var(--lcd-dark);color:var(--lcd-bg)}
+  .menu-item.sel .cur{visibility:visible}
+
+  /* GENERIC CONTENT PAGE */
+  .ph{font-size:8px;margin-bottom:5px;border-bottom:2px solid var(--lcd-dark);padding-bottom:3px}
+  .row{font-size:6.5px;line-height:1.9;color:var(--lcd-dark);margin-bottom:5px}
+  .row b{color:var(--lcd-mid)}
+  .bar{height:6px;background:var(--lcd-mid);border:1px solid var(--lcd-dark);margin:2px 0 6px;position:relative}
+  .bar i{position:absolute;left:0;top:0;bottom:0;background:var(--lcd-dark)}
+  .prj{border:2px solid var(--lcd-dark);padding:3px 4px;margin-bottom:5px;font-size:6px;line-height:1.8}
+  .prj b{font-size:7px}
+  .back{font-size:6px;margin-top:4px;color:var(--lcd-mid)}
+
+  /* ===== CONTROLS ===== */
+  .controls{margin-top:20px;position:relative;height:150px}
+
+  /* D-PAD */
+  .dpad{position:absolute;left:6px;top:8px;width:96px;height:96px}
+  .dpad button{
+    position:absolute;background:linear-gradient(145deg,#3a3a40,#1d1d21);
+    border:none;cursor:pointer;
+    box-shadow:inset 1px 1px 2px rgba(255,255,255,.15),0 2px 3px rgba(0,0,0,.5);
+  }
+  .dpad .up{left:33px;top:0;width:30px;height:36px;border-radius:5px 5px 0 0}
+  .dpad .down{left:33px;bottom:0;width:30px;height:36px;border-radius:0 0 5px 5px}
+  .dpad .left{left:0;top:33px;width:36px;height:30px;border-radius:5px 0 0 5px}
+  .dpad .right{right:0;top:33px;width:36px;height:30px;border-radius:0 5px 5px 0}
+  .dpad .mid{left:33px;top:33px;width:30px;height:30px;background:#26262b;box-shadow:inset 0 0 4px rgba(0,0,0,.7)}
+  .dpad .mid::after{content:"";position:absolute;inset:9px;border-radius:50%;background:radial-gradient(#333,#1c1c20)}
+  .dpad button:active{filter:brightness(1.4)}
+
+  /* A/B */
+  .ab{position:absolute;right:2px;top:20px;transform:rotate(-25deg)}
+  .ab button{
+    width:44px;height:44px;border-radius:50%;border:none;cursor:pointer;
+    background:radial-gradient(circle at 35% 30%,var(--btn-purple),var(--btn-purple-lo));
+    color:#e9c9df;font-family:inherit;font-size:11px;
+    box-shadow:inset 2px 2px 3px rgba(255,255,255,.25),inset -2px -2px 4px rgba(0,0,0,.5),0 3px 4px rgba(0,0,0,.5);
+    margin-left:12px;
+  }
+  .ab button:first-child{margin-top:26px}
+  .ab button:active{transform:translateY(2px);filter:brightness(1.1)}
+  .ab-labels{position:absolute;right:6px;top:8px;transform:rotate(-25deg);font-size:8px;color:var(--deep);width:120px}
+  .ab-labels span{position:absolute}
+  .ab-labels .lb{right:60px;top:76px}
+  .ab-labels .la{right:6px;top:50px}
+
+  /* START/SELECT */
+  .ss{position:absolute;left:50%;bottom:-4px;transform:translateX(-50%) rotate(-25deg);display:flex;gap:16px}
+  .ss div{display:flex;flex-direction:column;align-items:center;gap:4px}
+  .ss button{
+    width:34px;height:11px;border-radius:6px;border:none;cursor:pointer;
+    background:linear-gradient(145deg,#4a4a50,#2a2a2e);
+    box-shadow:inset 1px 1px 1px rgba(255,255,255,.15),0 2px 2px rgba(0,0,0,.5);
+  }
+  .ss button:active{filter:brightness(1.4)}
+  .ss span{font-size:6px;color:var(--deep);letter-spacing:1px}
+
+  /* speaker */
+  .speaker{position:absolute;right:16px;bottom:22px;transform:rotate(-25deg);display:grid;grid-template-columns:repeat(6,4px);gap:5px}
+  .speaker i{width:3px;height:22px;border-radius:2px;background:linear-gradient(var(--shell-lo),var(--shell-dark));box-shadow:inset 0 1px 1px rgba(0,0,0,.4)}
+
+  .hint{margin-top:14px;text-align:center;font-size:6px;color:var(--deep);line-height:1.8}
+
+  @media (max-width:400px){
+    .console{width:100%;max-width:340px}
+  }
+</style>
+</head>
+<body>
+
+<div class="console">
+  <div class="brandline"><span class="dot"></span>NEW-GRAD-RN-FOR-HIRE<span class="dot"></span></div>
+
+  <div class="screen-frame">
+    <div class="power-line"><span class="power-dot"></span>POWER</div>
+
+    <div class="lcd">
+      <div class="lcd-screen">
+        <div class="topbar">
+          <span id="crumb">HOME</span>
+          <span class="hearts">♥♥♥</span>
+        </div>
+        <div class="view">
+
+          <!-- HOME -->
+          <div class="page active" data-page="home">
+            <div class="avatar" id="avatar"></div>
+            <div class="home-title">EMMA MORALES</div>
+            <div class="home-sub">NEW GRAD RN</div>
+            <div class="press">▶ PRESS START</div>
+          </div>
+
+          <!-- MENU -->
+          <div class="page" data-page="menu">
+            <div class="menu-title">— MENU —</div>
+            <div class="menu-item sel"><span class="cur">▶</span>ABOUT</div>
+            <div class="menu-item"><span class="cur">▶</span>SKILLS</div>
+            <div class="menu-item"><span class="cur">▶</span>CLINICALS</div>
+            <div class="menu-item"><span class="cur">▶</span>CONTACT</div>
+          </div>
+
+          <!-- ABOUT -->
+          <div class="page" data-page="about">
+            <div class="ph">ABOUT</div>
+            <div class="row"><b>NAME:</b> Emma Morales<br>
+              <b>CLASS:</b> Registered Nurse, BSN<br>
+              <b>LVL:</b> 1 · <b>XP:</b> 0 yrs<br>
+              <b>LOC:</b> Bay Area</div>
+            <div class="row">New grad RN pursuing Emergency and Trauma nursing. Former Google engineer and manager who stays calm and effective in fast-moving, high-acuity, mission-critical environments. Brings a decade of operational leadership and problem solving into bedside nursing.
+</div>
+            <div class="back">B: BACK</div>
+          </div>
+
+          <!-- SKILLS -->
+          <div class="page" data-page="skills">
+            <div class="ph">SKILLS</div>
+            <div class="row"><b>LEADERSHIP</b><div class="bar"><i style="width:97%"></i></div>
+              <b>COMMUNICATION</b><div class="bar"><i style="width:95%"></i></div>
+              <b>ENGLISH</b><div class="bar"><i style="width:100%"></i></div>
+              <b>SPANISH</b><div class="bar"><i style="width:90%"></i></div></div>
+            <div class="back">B: BACK</div>
+          </div>
+
+          <!-- PROJECTS -->
+          <div class="page" data-page="projects">
+            <div class="ph">CLINICALS</div>
+            <div class="prj"><b>★ MEDSURG</b><br>SF General - 405hrs</div>
+            <div class="prj"><b>★ PEDIATRICS</b><br>SUTTER CPMC - 135hrs</div>
+            <div class="prj"><b>★ MATERNITY</b><br>SF General - 135hrs</div>
+            <div class="prj"><b>★ PSYCH</b><br>JMH - 135hrs</div>
+            <div class="back">B: BACK</div>
+          </div>
+
+          <!-- CONTACT -->
+          <div class="page" data-page="contact">
+            <div class="ph">CONTACT</div>
+            <div class="row"><b>MAIL:</b><br>404emmam@gmail.com<br><br>
+              <b>PHONE:</b>561.513.2722<br>
+              <b>RESUME:</b><a href="https://docs.google.com/document/d/e/2PACX-1vS3k5j7M8I-GNVeC67MR-2IhtBL8P3iRZ8pJvpy3TOGwxFu6DM6Xaa65QjyB-bTAyKFT-KrUtgnIjU1/pub" target="_blank">Found Here</a><br>
+              <b>WEB:</b>emmam.co</div>
+            <div class="row">A: START A NEW JOURNEY
+              TOGETHER →</div>
+            <div class="back">B: BACK</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="screen-label">FEATURED WITH STEREO SOUND</div>
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="controls">
+    <div class="dpad">
+      <button class="up"    data-dir="up"    aria-label="Up"></button>
+      <button class="left"  data-dir="left"  aria-label="Left"></button>
+      <button class="mid" disabled></button>
+      <button class="right" data-dir="right" aria-label="Right"></button>
+      <button class="down"  data-dir="down"  aria-label="Down"></button>
+    </div>
+
+    <div class="ab-labels"><span class="lb">B</span><span class="la">A</span></div>
+    <div class="ab">
+      <button id="btnB" aria-label="B button">B</button>
+      <button id="btnA" aria-label="A button">A</button>
+    </div>
+
+    <div class="speaker">
+      <i></i><i></i><i></i><i></i><i></i><i></i>
+    </div>
+
+    <div class="ss">
+      <div><button id="btnSelect" aria-label="Select"></button><span>SELECT</span></div>
+      <div><button id="btnStart" aria-label="Start"></button><span>START</span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // pixel avatar (8x8) — 1 = dark
+  var map = [
+    "00111100",
+    "01111110",
+    "11011011",
+    "11111111",
+    "11100111",
+    "01111110",
+    "00111100",
+    "01100110"
+  ];
+  var av = document.getElementById('avatar');
+  map.join('').split('').forEach(function(c){
+    var cell = document.createElement('i');
+    cell.style.background = c === '1' ? 'var(--lcd-dark)' : 'transparent';
+    av.appendChild(cell);
+  });
+
+  var pages = {}, crumb = document.getElementById('crumb');
+  document.querySelectorAll('.page').forEach(function(p){ pages[p.dataset.page] = p; });
+
+  var menuOrder = ['about','skills','projects','contact'];
+  var state = 'home';   // home | menu | content
+  var menuIndex = 0;
+
+  function show(name){
+    Object.values(pages).forEach(function(p){ p.classList.remove('active'); });
+    pages[name].classList.add('active');
+    crumb.textContent = name === 'projects' ? 'CLINICALS' : name.toUpperCase();
+  }
+
+  function renderMenu(){
+    show('menu');
+    crumb.textContent = 'MENU';
+    var items = pages.menu.querySelectorAll('.menu-item');
+    items.forEach(function(it,i){ it.classList.toggle('sel', i === menuIndex); });
+  }
+
+  function beep(){
+    try{
+      var ac = beep.ac || (beep.ac = new (window.AudioContext||window.webkitAudioContext)());
+      var o = ac.createOscillator(), g = ac.createGain();
+      o.type = 'square'; o.frequency.value = 620;
+      o.connect(g); g.connect(ac.destination);
+      g.gain.setValueAtTime(.05, ac.currentTime);
+      g.gain.exponentialRampToValueAtTime(.0001, ac.currentTime + .08);
+      o.start(); o.stop(ac.currentTime + .08);
+    }catch(e){}
+  }
+
+  function toStart(){ state = 'home'; show('home'); }
+
+  function pressStart(){
+    beep();
+    if(state === 'home'){ state = 'menu'; menuIndex = 0; renderMenu(); }
+    else { toStart(); }
+  }
+
+  function dir(d){
+    beep();
+    if(state === 'menu'){
+      if(d === 'down') menuIndex = (menuIndex + 1) % menuOrder.length;
+      if(d === 'up')   menuIndex = (menuIndex - 1 + menuOrder.length) % menuOrder.length;
+      renderMenu();
+    } else if(state === 'home' && (d === 'down' || d === 'right')){
+      state = 'menu'; menuIndex = 0; renderMenu();
+    }
+  }
+
+  function pressA(){
+    beep();
+    if(state === 'home'){ state = 'menu'; menuIndex = 0; renderMenu(); }
+    else if(state === 'menu'){ state = 'content'; show(menuOrder[menuIndex]); }
+  }
+
+  function pressB(){
+    beep();
+    if(state === 'content'){ state = 'menu'; renderMenu(); }
+    else if(state === 'menu'){ toStart(); }
+  }
+
+  // wire up
+  document.querySelectorAll('.dpad [data-dir]').forEach(function(b){
+    b.addEventListener('click', function(){ dir(b.dataset.dir); });
+  });
+  document.getElementById('btnA').addEventListener('click', pressA);
+  document.getElementById('btnB').addEventListener('click', pressB);
+  document.getElementById('btnStart').addEventListener('click', pressStart);
+  document.getElementById('btnSelect').addEventListener('click', function(){ beep(); toStart(); });
+
+  // keyboard
+  document.addEventListener('keydown', function(e){
+    switch(e.key){
+      case 'ArrowUp': dir('up'); e.preventDefault(); break;
+      case 'ArrowDown': dir('down'); e.preventDefault(); break;
+      case 'ArrowLeft': dir('left'); e.preventDefault(); break;
+      case 'ArrowRight': dir('right'); e.preventDefault(); break;
+      case 'Enter': pressStart(); break;
+      case 'z': case 'Z': pressA(); break;
+      case 'x': case 'X': pressB(); break;
+    }
+  });
+})();
+</script>
+</body>
+</html>
